@@ -1,4 +1,4 @@
-import numpy as np, pandas as pd, joblib, os
+import numpy as np, pandas as pd, joblib, os, math
 
 MODEL = joblib.load(os.path.join(os.path.dirname(__file__), "beer_model.pkl"))
 BEERS = list(MODEL.keys())  # 6銘柄名を自動取得
@@ -22,9 +22,16 @@ def _feature_engineering(payload: dict) -> pd.DataFrame:
 
 def predict_one(payload: dict) -> dict:
     X = _feature_engineering(payload)
-    preds = {b: round(float(MODEL[b].predict(X)[0]), 2) for b in BEERS}
-    preds["総予測杯数"] = round(sum(preds.values()), 2)
-    return preds
+    preds_raw = {b: float(MODEL[b].predict(X)[0]) for b in BEERS}
+    preds_ceil = {b: math.ceil(preds_raw[b]) for b in BEERS}
+    
+    result = {
+        b: f"{preds_ceil[b]}本（予測値: {preds_raw[b]:.2f}）" for b in BEERS
+    }
+    total_raw = sum(preds_raw.values())
+    total_ceil = sum(preds_ceil.values())
+    result["総予測杯数"] = f"{total_ceil}本（予測値: {total_raw:.2f}）"
+    return result
 
 if __name__ == "__main__":
     import json
