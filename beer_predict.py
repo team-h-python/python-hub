@@ -28,9 +28,11 @@ def predict_one(payload: dict) -> dict:
     result = {
         b: f"{preds_ceil[b]}本（予測値: {preds_raw[b]:.2f}）" for b in BEERS
     }
+    """
     total_raw = sum(preds_raw.values())
     total_ceil = sum(preds_ceil.values())
     result["総予測杯数"] = f"{total_ceil}本（予測値: {total_raw:.2f}）"
+    """
     return result
 
 if __name__ == "__main__":
